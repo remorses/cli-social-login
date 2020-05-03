@@ -12,4 +12,8 @@ export const URLS = {
         login: '/github',
         callback: '/github/callback',
     },
+    google: {
+        login: '/google',
+        callback: '/google/callback',
+    },
 }

@@ -4,40 +4,41 @@ import { AddressInfo } from 'net'
 import open from 'open'
 import path from 'path'
 import { Strategy as GitHubStrategy, StrategyOptions } from 'passport-github2'
-import passport from 'passport'
+import {
+    OAuth2Strategy as GoogleStrategy,
+    IOAuth2StrategyOption,
+} from 'passport-google-oauth'
+import passport, { Profile } from 'passport'
 
 import { LOCALHOST_LISTENER, LOGIN_STATIC_SITE_DIR, URLS } from './constants'
 
 const LOGIN_STATIC_SITE_PATH = path.resolve(__dirname, LOGIN_STATIC_SITE_DIR)
 
+type OptionsOverwrites = {
+    callbackURL?: string
+    scope?: string[]
+}
+
 export interface Args {
-    githubOptions?: Omit<StrategyOptions, 'callbackURL'> & {
-        callbackURL?: string
-    }
+    githubOptions?: Omit<StrategyOptions, 'callbackURL'> & OptionsOverwrites
+    googleOptions?: Omit<IOAuth2StrategyOption, 'callbackURL'> &
+        OptionsOverwrites
     port?: number
 }
 
-export function newAuthServer({
-    githubOptions = null,
-    port = 7043,
-}: Args): Promise<{
-    user: { uid; displayName; email }
-    idToken: string
-    githubToken: string
+export function newAuthServer(
+    args: Args,
+): Promise<{
+    profile: Profile
+    accessToken: string
 }> {
+    const { githubOptions = null, googleOptions = null, port = 7043 } = args
     return new Promise((resolve, rej) => {
         const baseUrl = `http://127.0.0.1:${port}`
         function finish(req, res) {
             res.redirect(`/?username=${req.user.username}`)
             res.end()
             setTimeout(() => httpTerminator.terminate().catch(console.log), 500)
-            // server.close((err) => {
-            //     if (err) {
-            //         console.log('ERROR CLOSING', err)
-            //     }
-            //     console.log('closed server')
-            // })
-
             resolve(req.user)
         }
         passport.serializeUser(function (user, done) {
@@ -61,7 +62,11 @@ export function newAuthServer({
                         ...githubOptions,
                     },
                     function (accessToken, refreshToken, profile, done) {
-                        return done(null, profile)
+                        return done(null, {
+                            profile,
+                            accessToken,
+                            refreshToken,
+                        }) // TODO add access tokens here
                     },
                 ),
             )
@@ -78,12 +83,43 @@ export function newAuthServer({
                 finish,
             )
         }
+        if (googleOptions) {
+            const scope = googleOptions.scope || ['openid', 'email', 'profile'] // 'https://www.googleapis.com/auth/userinfo.email'
+            passport.use(
+                new GoogleStrategy(
+                    {
+                        callbackURL: baseUrl + URLS.google.callback,
+                        ...googleOptions,
+                    },
+                    function (accessToken, tokenSecret, profile, done) {
+                        // TODO tokenSecret and refreshToken are undefined
+                        return done(null, { profile, accessToken })
+                    },
+                ),
+            )
+            app.get(
+                URLS.google.login,
+                passport.authenticate('google', {
+                    scope,
+                }),
+            )
+
+            app.get(
+                URLS.google.callback,
+                passport.authenticate('google', {
+                    failureRedirect: '/',
+                    scope,
+                }),
+                finish,
+            )
+        }
 
         const server = app.listen(port, () => {
             const info = server.address() as AddressInfo
-            const address: string = info.port
-                ? 'http://localhost:' + info.port
-                : (info as any)
+            const providers = getProviders(args)
+            const address: string =
+                `http://localhost:${port}/?` +
+                (providers ? `providers=${providers}` : '')
             console.log('login at ' + address)
             // open(address, { background: false, wait: false })
         })
@@ -91,4 +127,16 @@ export function newAuthServer({
             server,
         })
     })
+}
+
+function getProviders(args: Args): string {
+    let providers = []
+    if (args.githubOptions) {
+        providers.push('github')
+    }
+    if (args.googleOptions) {
+        providers.push('google')
+    }
+
+    return providers.join(',')
 }

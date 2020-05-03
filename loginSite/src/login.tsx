@@ -2,6 +2,7 @@ import React from 'react'
 import {
     FacebookLoginButton,
     GithubLoginButton,
+    GoogleLoginButton,
 } from 'react-social-login-buttons'
 import { URLS } from '../../src/constants'
 import { useState } from 'react'
@@ -13,6 +14,9 @@ const Button = ({ provider }) => {
     }
     if (provider == 'github') {
         return <GithubLoginButton onClick={onClick} />
+    }
+    if (provider == 'google') {
+        return <GoogleLoginButton onClick={onClick} />
     }
     return null
 }
