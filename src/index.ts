@@ -19,6 +19,12 @@ type OptionsOverwrites = {
     scope?: string[]
 }
 
+export type LoginOnLocalhostReturnType = {
+    profile: Profile
+    accessToken: string
+    provider: string
+}
+
 export interface Args {
     githubOptions?: Omit<StrategyOptions, 'callbackURL'> & OptionsOverwrites
     googleOptions?: Omit<IOAuth2StrategyOption, 'callbackURL'> &
@@ -28,10 +34,7 @@ export interface Args {
 
 export function loginOnLocalhost(
     args: Args,
-): Promise<{
-    profile: Profile
-    accessToken: string
-}> {
+): Promise<LoginOnLocalhostReturnType> {
     const { githubOptions = null, googleOptions = null, port = 7043 } = args
     return new Promise((resolve, rej) => {
         const baseUrl = `http://127.0.0.1:${port}`
@@ -65,8 +68,9 @@ export function loginOnLocalhost(
                         return done(null, {
                             profile,
                             accessToken,
+                            provider: profile.provider,
                             refreshToken,
-                        }) // TODO add access tokens here
+                        } as LoginOnLocalhostReturnType) // TODO add access tokens here
                     },
                 ),
             )
@@ -93,7 +97,11 @@ export function loginOnLocalhost(
                     },
                     function (accessToken, tokenSecret, profile, done) {
                         // TODO tokenSecret and refreshToken are undefined
-                        return done(null, { profile, accessToken })
+                        return done(null, {
+                            profile,
+                            accessToken,
+                            provider: profile.provider,
+                        } as LoginOnLocalhostReturnType)
                     },
                 ),
             )
