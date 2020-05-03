@@ -26,7 +26,7 @@ export interface Args {
     port?: number
 }
 
-export function newAuthServer(
+export function loginOnLocalhost(
     args: Args,
 ): Promise<{
     profile: Profile
