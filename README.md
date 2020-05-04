@@ -9,7 +9,7 @@ npm i cli-social-login
 ```
 
 ```ts
-import { loginOnLocalhost } from 'loginOnLocalhost'
+import { loginOnLocalhost } from 'cli-social-login'
 
 // starts a server on localhost to login the user
 const { credentials, user } = await loginOnLocalhost({
