@@ -1,6 +1,7 @@
 import path from 'path'
 
 export const LOCALHOST_LISTENER = '/onLogin'
+export const LOCALHOST_CONFIG_PATH = '/config'
 export const LOGIN_STATIC_SITE_DIR = 'loginStaticSite'
 
 export const URLS = {

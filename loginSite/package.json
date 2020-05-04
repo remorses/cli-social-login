@@ -38,6 +38,7 @@
     "dependencies": {
         "@types/react": "^16.9.23",
         "firebase-react-components": "^1.1.19",
+        "react-extra-hooks": "^2.3.1",
         "react-social-login-buttons": "^3.0.0"
     },
     "peerDependencies": {
