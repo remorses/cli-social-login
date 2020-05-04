@@ -1,6 +1,6 @@
 # cli-social-login
 
-Uses firebase and a local server to login the user via firebase and get an oauth access token
+Uses firebase and a local server to login the user and get an oauth access token from github, facebook, twitter, ...
 
 ## Usage
 
@@ -8,13 +8,15 @@ Uses firebase and a local server to login the user via firebase and get an oauth
 npm i cli-social-login
 ```
 
+Use in your cli to get an auth token via the browser login
+The function will pause until the user logins in the printed localhost url
+
 ```ts
 import { loginOnLocalhost } from 'cli-social-login'
 
 // starts a server on localhost to login the user
 const { credentials, user } = await loginOnLocalhost({
     firebaseConfig,
-    providers: ['github'],
     providers: ['github'],
     scopes: {
         github: ['repo'],
