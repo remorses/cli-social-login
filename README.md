@@ -1,6 +1,12 @@
 # cli-social-login
 
-TODO i cannot expose the clientSecret inside the api, the passport part should be deployed in a server
+Uses firebase and a local server to login the user via firebase and get an oauth access token
+
+## Usage
+
+```
+npm i cli-social-login
+```
 
 ```ts
 import { loginOnLocalhost } from 'loginOnLocalhost'
