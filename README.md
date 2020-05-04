@@ -6,14 +6,15 @@ TODO i cannot expose the clientSecret inside the api, the passport part should b
 import { loginOnLocalhost } from 'loginOnLocalhost'
 
 // starts a server on localhost to login the user
-const { profile, accessToken, provider } = await loginOnLocalhost({
-    googleOptions: {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-        scope: ['...'],
+const { credentials, user } = await loginOnLocalhost({
+    firebaseConfig,
+    providers: ['github'],
+    providers: ['github'],
+    scopes: {
+        github: ['repo'],
     },
-    port: 3000,
+    port: 3000, // default sto random port
 })
-
-// use your google token
+const githubToken = credentials.oauthAccessToken
+// use your github token
 ```
