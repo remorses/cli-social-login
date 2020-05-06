@@ -1,5 +1,5 @@
 import { render } from 'react-dom'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { ApiResult, LoginOnLocalhostReturnType } from '../../src'
 import { usePromise } from 'react-extra-hooks'
 import {
@@ -11,6 +11,7 @@ import { URLS, LOCALHOST_CONFIG_PATH } from '../../src/constants'
 
 import firebase from 'firebase/app'
 import 'firebase/auth'
+import 'firebase/analytics'
 import {
     GoogleButton,
     GithubButton,
@@ -19,6 +20,8 @@ import {
 } from 'firebase-react-components/'
 import { LOCALHOST_LISTENER } from '../../src/constants'
 import { useState } from 'react'
+
+let analytics: firebase.analytics.Analytics
 
 export async function onLogin(
     user: firebase.User,
@@ -40,6 +43,8 @@ export async function onLogin(
             credentials: creds.toJSON(),
         } as LoginOnLocalhostReturnType),
     })
+    analytics.setUserId(idToken)
+    analytics.logEvent('cli_logged_in')
     window.close()
 }
 
@@ -48,6 +53,7 @@ function setupFirebase(config) {
         firebase.initializeApp(config)
         firebase.auth().setPersistence(firebase.auth.Auth.Persistence.NONE)
     }
+    analytics = firebase.analytics()
 }
 
 const LoginPage = () => {
@@ -59,11 +65,18 @@ const LoginPage = () => {
             },
         }).then((x) => x.json()),
     )
+    
+    useEffect(() => {
+        analytics && analytics.logEvent('cli_begin_login')
+    }, [analytics])
+
     const [loggedIn, setLoggedIn] = useState(false)
     if (!result) {
         return null
     }
+
     setupFirebase(result.firebaseConfig)
+
     if (loggedIn) {
         return (
             <Container>
