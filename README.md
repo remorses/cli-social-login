@@ -2,6 +2,8 @@
 
 Function to login the user and get an oauth access token from github, facebook, twitter, ... using firebase and a local server
 
+It also emits the events `cli_begin_login` and `cli_logeed_in` so you can discover how many users try to login and then churn away.
+
 ## Usage
 
 ```
